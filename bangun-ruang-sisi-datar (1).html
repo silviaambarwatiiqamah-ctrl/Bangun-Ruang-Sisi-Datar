@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangun Ruang Sisi Datar</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090e;
+  --bg2:#0d1018;
+  --bg3:#121520;
+  --card:#141824;
+  --card2:#191e2a;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.12);
+  --text:#dde1ef;
+  --muted:#616880;
+  --muted2:#8b92a8;
+  --blue:#4a90d9;
+  --blue2:#6aaee8;
+  --purple:#8b5cf6;
+  --teal:#2dd4bf;
+  --amber:#f59e0b;
+  --red:#f87171;
+  --green:#4ade80;
+}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+header{
+  padding:36px 48px 28px;
+  text-align:center;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(74,144,217,0.06) 0%,transparent 100%);
+}
+header::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.header-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(74,144,217,0.1);border:1px solid rgba(74,144,217,0.2);
+  color:#6aaee8;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 14px;border-radius:20px;margin-bottom:16px;
+}
+header h1{
+  font-size:clamp(24px,3.5vw,40px);font-weight:800;letter-spacing:-1.5px;
+  background:linear-gradient(135deg,#ffffff 0%,#a8c4e8 50%,var(--blue) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.15;
+}
+header p{margin-top:10px;font-size:14px;color:var(--muted2);max-width:500px;margin-inline:auto;line-height:1.7}
+
+/* ── SHAPE SELECTOR ── */
+.shape-nav{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.shape-nav::-webkit-scrollbar{display:none}
+.shape-tab{
+  flex:1;min-width:160px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:18px 12px 16px;
+  border:none;background:transparent;cursor:pointer;
+  border-bottom:2px solid transparent;
+  font-family:inherit;color:var(--muted);
+  transition:all 0.2s;position:relative;
+}
+.shape-tab:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.shape-tab.active{color:var(--text);border-bottom-color:var(--blue);background:rgba(74,144,217,0.05)}
+.shape-tab .s-icon{font-size:26px;line-height:1;transition:transform 0.2s}
+.shape-tab:hover .s-icon,.shape-tab.active .s-icon{transform:scale(1.12)}
+.shape-tab .s-name{font-size:12px;font-weight:600;letter-spacing:0.3px}
+.shape-tab .s-sub{font-size:10px;color:var(--muted);font-weight:400}
+.shape-tab.active .s-sub{color:var(--blue2);opacity:0.8}
+
+/* ── MAIN LAYOUT ── */
+.main{display:grid;grid-template-columns:1fr 380px;min-height:calc(100vh - 220px)}
+
+/* ── CANVAS AREA ── */
+.canvas-area{
+  position:relative;background:var(--bg);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+}
+.canvas-header{
+  padding:14px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.canvas-title{font-size:13px;font-weight:600;color:var(--muted2)}
+.canvas-hint{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.dot-hint{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+#threeCanvas{display:block;width:100%;flex:1;min-height:420px;cursor:grab}
+#threeCanvas:active{cursor:grabbing}
+
+.shape-controls{
+  padding:14px 20px;
+  display:flex;gap:10px;align-items:center;
+  border-top:1px solid var(--border);
+  background:var(--bg2);
+}
+.ctrl-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap}
+.ctrl-btn{
+  padding:6px 14px;border-radius:6px;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--muted2);font-family:inherit;font-size:12px;
+  font-weight:500;cursor:pointer;transition:all 0.15s;
+}
+.ctrl-btn:hover{background:var(--card2);color:var(--text);border-color:rgba(74,144,217,0.4)}
+.ctrl-btn.on{background:rgba(74,144,217,0.12);color:var(--blue2);border-color:rgba(74,144,217,0.35)}
+.color-chips{display:flex;gap:6px}
+.chip{width:22px;height:22px;border-radius:5px;border:2px solid transparent;cursor:pointer;transition:all 0.15s}
+.chip:hover,.chip.sel{border-color:#fff;transform:scale(1.15)}
+
+/* ── INFO PANEL ── */
+.info-side{
+  background:var(--bg2);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.info-tabs{
+  display:flex;border-bottom:1px solid var(--border);
+}
+.info-tab{
+  flex:1;padding:12px 8px;text-align:center;
+  border:none;background:transparent;cursor:pointer;
+  font-family:inherit;font-size:12px;font-weight:600;
+  color:var(--muted);letter-spacing:0.5px;
+  border-bottom:2px solid transparent;transition:all 0.15s;
+}
+.info-tab:hover{color:var(--text)}
+.info-tab.active{color:var(--blue2);border-bottom-color:var(--blue)}
+.info-panels{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+
+/* Tab: Tentang */
+.about-panel{padding:24px 22px}
+.about-title{
+  font-size:19px;font-weight:800;letter-spacing:-0.5px;
+  margin-bottom:8px;line-height:1.2;
+}
+.about-desc{font-size:13px;color:var(--muted2);line-height:1.75;margin-bottom:20px}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.stat-box{
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;text-align:center;
+}
+.stat-val{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px}
+.sifat-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.sifat-list{display:flex;flex-direction:column;gap:7px}
+.sifat-item{display:flex;gap:10px;font-size:13px;color:var(--muted2);line-height:1.5;align-items:flex-start}
+.sifat-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px}
+
+/* Tab: Rumus */
+.rumus-panel{padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.formula-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;
+}
+.formula-name{font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.formula-eq{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;line-height:1.5}
+.formula-eq .var{color:var(--blue2)}
+.formula-eq .op{color:var(--muted2)}
+.formula-note{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5}
+.jaring-hint{
+  background:rgba(45,212,191,0.07);border:1px solid rgba(45,212,191,0.18);
+  border-radius:8px;padding:12px 14px;margin-top:4px;
+}
+.jaring-hint p{font-size:12px;color:#5de8d8;line-height:1.6}
+
+/* Tab: Kalkulator */
+.calc-panel{padding:20px 22px}
+.calc-section-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.input-row{margin-bottom:12px}
+.input-row label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.input-row label span{font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:0.3px}
+.input-row label em{font-size:10px;color:var(--muted);font-style:normal}
+.input-row input{
+  width:100%;padding:9px 12px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);font-family:'DM Mono',monospace;font-size:14px;outline:none;
+  transition:border-color 0.15s;
+}
+.input-row input:focus{border-color:rgba(74,144,217,0.5)}
+.input-row input::placeholder{color:var(--muted);font-size:13px}
+.calc-btn{
+  width:100%;padding:11px;margin:16px 0 14px;
+  border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:700;
+  cursor:pointer;letter-spacing:0.3px;transition:opacity 0.15s;
+  background:linear-gradient(135deg,var(--blue),#3a7ac7);color:#fff;
+}
+.calc-btn:hover{opacity:0.88}
+.result-area{display:none}
+.result-area.show{display:block}
+.result-divider{height:1px;background:var(--border);margin:12px 0}
+.result-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.result-item{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 0;border-bottom:1px solid var(--border);
+}
+.result-item:last-child{border-bottom:none}
+.r-lbl{font-size:12.5px;color:var(--muted2)}
+.r-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--teal)}
+.err-msg{font-size:12px;color:var(--red);padding:8px 0}
+
+/* scrollbar */
+.info-panels::-webkit-scrollbar{width:4px}
+.info-panels::-webkit-scrollbar-track{background:transparent}
+.info-panels::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+@media(max-width:880px){
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .canvas-area{border-right:none;border-bottom:1px solid var(--border)}
+  #threeCanvas{min-height:340px}
+  .info-side{max-height:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-badge">🎓 Media Pembelajaran Interaktif</div>
+  <h1>Bangun Ruang Sisi Datar</h1>
+  <p>Eksplorasi 3D interaktif — putar model, pelajari rumus, dan hitung ukuran bangun ruang dengan mudah.</p>
+</header>
+
+<!-- SHAPE SELECTOR -->
+<div class="shape-nav">
+  <button class="shape-tab active" onclick="selectShape('kubus',this)">
+    <span class="s-icon">🧊</span>
+    <span class="s-name">Kubus</span>
+    <span class="s-sub">6 sisi · 12 rusuk</span>
+  </button>
+  <button class="shape-tab" onclick="selectShape('balok',this)">
+    <span class="s-icon">📦</span>
+    <span class="s-name">Balok</span>
+    <span class="s-sub">6 sisi · 12 rusuk</span>
+  </button>
+  <button class="shape-tab" onclick="selectShape('prisma',this)">
+    <span class="s-icon">🔷</span>
+    <span class="s-name">Prisma Segitiga</span>
+    <span class="s-sub">5 sisi · 9 rusuk</span>
+  </button>
+  <button class="shape-tab" onclick="selectShape('limas',this)">
+    <span class="s-icon">🏔️</span>
+    <span class="s-name">Limas Segi Empat</span>
+    <span class="s-sub">5 sisi · 8 rusuk</span>
+  </button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- 3D CANVAS -->
+  <div class="canvas-area">
+    <div class="canvas-header">
+      <span class="canvas-title" id="canvasTitle">Kubus</span>
+      <span class="canvas-hint"><span class="dot-hint"></span>Klik & seret untuk memutar · Scroll untuk zoom</span>
+    </div>
+    <canvas id="threeCanvas"></canvas>
+    <div class="shape-controls">
+      <span class="ctrl-label">Warna:</span>
+      <div class="color-chips">
+        <div class="chip sel" style="background:#4a90d9" onclick="setColor('#4a90d9','#1a4f8c',this)" title="Biru"></div>
+        <div class="chip" style="background:#8b5cf6" onclick="setColor('#8b5cf6','#5b2fb5',this)" title="Ungu"></div>
+        <div class="chip" style="background:#2dd4bf" onclick="setColor('#2dd4bf','#0d8c7e',this)" title="Teal"></div>
+        <div class="chip" style="background:#f59e0b" onclick="setColor('#f59e0b','#a36800',this)" title="Amber"></div>
+        <div class="chip" style="background:#f87171" onclick="setColor('#f87171','#a83232',this)" title="Merah"></div>
+        <div class="chip" style="background:#4ade80" onclick="setColor('#4ade80','#1a8c3e',this)" title="Hijau"></div>
+      </div>
+      <span style="flex:1"></span>
+      <button class="ctrl-btn" id="wireBtn" onclick="toggleWire()">Wireframe</button>
+      <button class="ctrl-btn" id="autoBtn" onclick="toggleAuto()" title="Putar otomatis">⟳ Auto</button>
+    </div>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div class="info-side">
+    <div class="info-tabs">
+      <button class="info-tab active" onclick="switchInfoTab('tentang',this)">Tentang</button>
+      <button class="info-tab" onclick="switchInfoTab('rumus',this)">Rumus</button>
+      <button class="info-tab" onclick="switchInfoTab('kalkulator',this)">Kalkulator</button>
+    </div>
+    <div class="info-panels">
+      <div id="pane-tentang"></div>
+      <div id="pane-rumus" style="display:none"></div>
+      <div id="pane-kalkulator" style="display:none"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- THREE.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════
+   SHAPE DATA
+══════════════════════════════════════════════ */
+const SHAPES = {
+  kubus: {
+    label:'Kubus',
+    color:'Biru (#4a90d9)',
+    sifat:{sisi:6,rusuk:12,titikSudut:8},
+    desc:'Kubus adalah bangun ruang tiga dimensi yang dibatasi oleh enam sisi berbentuk persegi yang kongruen. Semua rusuk memiliki panjang yang sama (a), dan semua sudut siku-siku (90°).',
+    props:[
+      '6 sisi berbentuk persegi yang kongruen',
+      '12 rusuk yang sama panjang',
+      '8 titik sudut',
+      '4 diagonal ruang yang sama panjang (a√3)',
+      '12 diagonal bidang yang sama panjang (a√2)',
+      'Merupakan prisma segi empat beraturan',
+    ],
+    formulas:[
+      {name:'Volume',eq:'V <op>=</op> <var>a</var> <op>×</op> <var>a</var> <op>×</op> <var>a</var> <op>=</op> <var>a³</var>',note:'a = panjang rusuk'},
+      {name:'Luas Permukaan',eq:'L <op>=</op> <op>6</op> <op>×</op> <var>a²</var>',note:'6 sisi, masing-masing persegi a × a'},
+      {name:'Diagonal Bidang',eq:'d_b <op>=</op> <var>a</var><op>√2</op>',note:'Diagonal pada satu sisi persegi'},
+      {name:'Diagonal Ruang',eq:'d_r <op>=</op> <var>a</var><op>√3</op>',note:'Diagonal dari sudut ke sudut berlawanan'},
+    ],
+    inputs:[
+      {id:'a',label:'Panjang Rusuk',unit:'satuan',ph:'contoh: 5'},
+    ],
+    calc:(v)=>{
+      const a=+v.a;
+      if(!a||a<=0) return null;
+      return[
+        {l:'Volume',v:`${(a**3).toLocaleString('id',{maximumFractionDigits:4})} satuan³`},
+        {l:'Luas Permukaan',v:`${(6*a**2).toLocaleString('id',{maximumFractionDigits:4})} satuan²`},
+        {l:'Diagonal Bidang',v:`${(a*Math.SQRT2).toFixed(4)} satuan`},
+        {l:'Diagonal Ruang',v:`${(a*Math.sqrt(3)).toFixed(4)} satuan`},
+        {l:'Luas 1 Sisi',v:`${(a**2).toFixed(4)} satuan²`},
+      ];
+    },
+  },
+  balok: {
+    label:'Balok',
+    sifat:{sisi:6,rusuk:12,titikSudut:8},
+    desc:'Balok adalah bangun ruang tiga dimensi yang dibatasi oleh tiga pasang sisi berbentuk persegi panjang yang saling sejajar dan kongruen. Berbeda dari kubus, rusuk-rusuknya memiliki tiga ukuran berbeda (p, l, t).',
+    props:[
+      '6 sisi persegi panjang (3 pasang yang kongruen)',
+      '12 rusuk (4 rusuk panjang, 4 lebar, 4 tinggi)',
+      '8 titik sudut dengan sudut 90°',
+      '4 diagonal ruang yang sama panjang',
+      'Kubus adalah kasus khusus balok (p = l = t)',
+    ],
+    formulas:[
+      {name:'Volume',eq:'V <op>=</op> <var>p</var> <op>×</op> <var>l</var> <op>×</op> <var>t</var>',note:'p = panjang, l = lebar, t = tinggi'},
+      {name:'Luas Permukaan',eq:'L <op>=</op> <op>2(</op><var>pl</var> <op>+</op> <var>pt</var> <op>+</op> <var>lt</var><op>)</op>',note:'Jumlah luas semua 6 sisi'},
+      {name:'Diagonal Ruang',eq:'d <op>=</op> <op>√(</op><var>p²+l²+t²</var><op>)</op>',note:'Panjang diagonal yang menghubungkan dua sudut berlawanan'},
+      {name:'Diagonal Bidang (p×l)',eq:'d₁ <op>=</op> <op>√(</op><var>p²+l²</var><op>)</op>',note:'Diagonal pada sisi alas'},
+    ],
+    inputs:[
+      {id:'p',label:'Panjang (p)',unit:'satuan',ph:'contoh: 8'},
+      {id:'l',label:'Lebar (l)',unit:'satuan',ph:'contoh: 5'},
+      {id:'t',label:'Tinggi (t)',unit:'satuan',ph:'contoh: 4'},
+    ],
+    calc:(v)=>{
+      const p=+v.p,l=+v.l,t=+v.t;
+      if([p,l,t].some(x=>!x||x<=0)) return null;
+      return[
+        {l:'Volume',v:`${(p*l*t).toFixed(4)} satuan³`},
+        {l:'Luas Permukaan',v:`${(2*(p*l+p*t+l*t)).toFixed(4)} satuan²`},
+        {l:'Diagonal Ruang',v:`${(Math.sqrt(p**2+l**2+t**2)).toFixed(4)} satuan`},
+        {l:'Diagonal Bidang (p×l)',v:`${(Math.sqrt(p**2+l**2)).toFixed(4)} satuan`},
+        {l:'Diagonal Bidang (p×t)',v:`${(Math.sqrt(p**2+t**2)).toFixed(4)} satuan`},
+      ];
+    },
+  },
+  prisma: {
+    label:'Prisma Segitiga',
+    sifat:{sisi:5,rusuk:9,titikSudut:6},
+    desc:'Prisma segitiga adalah bangun ruang yang memiliki dua alas berbentuk segitiga yang kongruen dan sejajar, serta tiga sisi tegak berbentuk persegi panjang yang menghubungkan kedua alas.',
+    props:[
+      '2 sisi alas berbentuk segitiga (atas dan bawah)',
+      '3 sisi tegak berbentuk persegi panjang',
+      '9 rusuk (3 alas bawah + 3 alas atas + 3 tegak)',
+      '6 titik sudut',
+      'Tinggi prisma tegak lurus terhadap bidang alas',
+    ],
+    formulas:[
+      {name:'Luas Alas (Segitiga)',eq:'A <op>=</op> <op>½</op> <op>×</op> <var>a</var> <op>×</op> <var>t_a</var>',note:'a = alas segitiga, t_a = tinggi segitiga'},
+      {name:'Volume',eq:'V <op>=</op> <var>A_alas</var> <op>×</op> <var>t_prisma</var>',note:'t_prisma = tinggi prisma'},
+      {name:'Keliling Alas',eq:'K <op>=</op> <var>a</var> <op>+</op> <var>b</var> <op>+</op> <var>c</var>',note:'Jumlah ketiga sisi segitiga'},
+      {name:'Luas Permukaan',eq:'L <op>=</op> <op>2</op><var>A</var> <op>+</op> <var>K</var> <op>×</op> <var>t</var>',note:'2 alas + luas 3 sisi tegak'},
+    ],
+    inputs:[
+      {id:'a',label:'Alas Segitiga (a)',unit:'satuan',ph:'contoh: 6'},
+      {id:'ta',label:'Tinggi Segitiga (t_a)',unit:'satuan',ph:'contoh: 4'},
+      {id:'b',label:'Sisi b Segitiga',unit:'satuan',ph:'contoh: 5'},
+      {id:'c',label:'Sisi c Segitiga',unit:'satuan',ph:'contoh: 5'},
+      {id:'t',label:'Tinggi Prisma (t)',unit:'satuan',ph:'contoh: 10'},
+    ],
+    calc:(v)=>{
+      const a=+v.a,ta=+v.ta,b=+v.b,c=+v.c,t=+v.t;
+      if([a,ta,b,c,t].some(x=>!x||x<=0)) return null;
+      const La=0.5*a*ta, K=a+b+c;
+      return[
+        {l:'Luas Alas Segitiga',v:`${La.toFixed(4)} satuan²`},
+        {l:'Keliling Alas',v:`${K.toFixed(4)} satuan`},
+        {l:'Volume',v:`${(La*t).toFixed(4)} satuan³`},
+        {l:'Luas Permukaan',v:`${(2*La+K*t).toFixed(4)} satuan²`},
+        {l:'Luas Sisi Tegak (a×t)',v:`${(a*t).toFixed(4)} satuan²`},
+      ];
+    },
+  },
+  limas: {
+    label:'Limas Segi Empat',
+    sifat:{sisi:5,rusuk:8,titikSudut:5},
+    desc:'Limas segi empat (piramida) adalah bangun ruang yang memiliki satu alas berbentuk persegi atau persegi panjang, dan empat sisi tegak berbentuk segitiga yang bertemu di satu titik puncak.',
+    props:[
+      '1 sisi alas berbentuk persegi atau persegi panjang',
+      '4 sisi tegak berbentuk segitiga',
+      '8 rusuk (4 alas + 4 rusuk tegak)',
+      '5 titik sudut (4 alas + 1 puncak)',
+      'Volume ⅓ dari prisma dengan alas & tinggi yang sama',
+      'Piramida Giza adalah contoh nyata di dunia',
+    ],
+    formulas:[
+      {name:'Luas Alas',eq:'A <op>=</op> <var>p</var> <op>×</op> <var>l</var>',note:'p = panjang, l = lebar alas'},
+      {name:'Volume',eq:'V <op>=</op> <op>⅓</op> <op>×</op> <var>p</var> <op>×</op> <var>l</var> <op>×</op> <var>t</var>',note:'t = tinggi limas'},
+      {name:'Tinggi Sisi Tegak',eq:'t_s <op>=</op> <op>√(</op><var>t²</var> <op>+</op> <op>(</op><var>p</var><op>/2)²)</op>',note:'Apotema sisi tegak'},
+      {name:'Luas Permukaan',eq:'L <op>=</op> <var>pl</var> <op>+</op> <op>2</op><var>p·t_s</var> <op>+</op> <op>2</op><var>l·t_s′</var>',note:'Alas + 4 segitiga sisi tegak'},
+    ],
+    inputs:[
+      {id:'p',label:'Panjang Alas (p)',unit:'satuan',ph:'contoh: 8'},
+      {id:'l',label:'Lebar Alas (l)',unit:'satuan',ph:'contoh: 8'},
+      {id:'t',label:'Tinggi Limas (t)',unit:'satuan',ph:'contoh: 10'},
+    ],
+    calc:(v)=>{
+      const p=+v.p,l=+v.l,t=+v.t;
+      if([p,l,t].some(x=>!x||x<=0)) return null;
+      const La=p*l;
+      const ts1=Math.sqrt(t**2+(l/2)**2);
+      const ts2=Math.sqrt(t**2+(p/2)**2);
+      const Lp=La+p*ts1+l*ts2;
+      return[
+        {l:'Luas Alas',v:`${La.toFixed(4)} satuan²`},
+        {l:'Volume',v:`${((1/3)*La*t).toFixed(4)} satuan³`},
+        {l:'Tinggi Sisi Tegak (sisi p)',v:`${ts1.toFixed(4)} satuan`},
+        {l:'Tinggi Sisi Tegak (sisi l)',v:`${ts2.toFixed(4)} satuan`},
+        {l:'Luas Permukaan',v:`${Lp.toFixed(4)} satuan²`},
+      ];
+    },
+  },
+};
+
+/* ══════════════════════════════════════════════
+   THREE.JS SETUP
+══════════════════════════════════════════════ */
+const canvas = document.getElementById('threeCanvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x08090e);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+camera.position.set(4, 3, 5);
+camera.lookAt(0,0,0);
+
+// Lights
+const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(5, 8, 5);
+dirLight.castShadow = true;
+scene.add(dirLight);
+const fillLight = new THREE.DirectionalLight(0x4a90d9, 0.3);
+fillLight.position.set(-4,-2,-4);
+scene.add(fillLight);
+
+// Grid
+const gridHelper = new THREE.GridHelper(10, 10, 0x1e2330, 0x141824);
+gridHelper.position.y = -1.5;
+scene.add(gridHelper);
+
+// Axes (small)
+const axesHelper = new THREE.AxesHelper(1.5);
+axesHelper.position.set(-3,-1.4,-3);
+scene.add(axesHelper);
+
+let currentMesh = null;
+let wireMesh = null;
+let faceColor = 0x4a90d9;
+let darkColor = 0x1a4f8c;
+let wireMode = false;
+let autoRotate = true;
+let isDragging = false;
+let prevMouse = {x:0,y:0};
+let rotX = 0.3, rotY = 0.5;
+
+/* ── Build shapes ── */
+function buildShape(key){
+  // Remove old
+  if(currentMesh){scene.remove(currentMesh);currentMesh.geometry.dispose();currentMesh.material.dispose()}
+  if(wireMesh){scene.remove(wireMesh);wireMesh.geometry.dispose();wireMesh.material.dispose()}
+
+  let geo;
+  if(key==='kubus'){
+    geo = new THREE.BoxGeometry(2,2,2);
+  } else if(key==='balok'){
+    geo = new THREE.BoxGeometry(3,1.5,2);
+  } else if(key==='prisma'){
+    // Triangular prism via ExtrudeGeometry
+    const shape = new THREE.Shape();
+    shape.moveTo(-1.2, -1);
+    shape.lineTo(1.2, -1);
+    shape.lineTo(0, 1.2);
+    shape.closePath();
+    geo = new THREE.ExtrudeGeometry(shape,{depth:2.2,bevelEnabled:false});
+    geo.translate(0,0,-1.1);
+    geo.rotateX(-Math.PI/2);
+    geo.translate(0,-0.1,0);
+  } else if(key==='limas'){
+    // Square pyramid – manual vertices
+    const verts = new Float32Array([
+      // base
+      -1.2,-1,-1.2,  1.2,-1,-1.2,  1.2,-1,1.2,
+      -1.2,-1,-1.2,  1.2,-1,1.2,  -1.2,-1,1.2,
+      // front
+      -1.2,-1,1.2,  1.2,-1,1.2,  0,1.5,0,
+      // back
+      1.2,-1,-1.2,  -1.2,-1,-1.2,  0,1.5,0,
+      // right
+      1.2,-1,1.2,  1.2,-1,-1.2,  0,1.5,0,
+      // left
+      -1.2,-1,-1.2,  -1.2,-1,1.2,  0,1.5,0,
+    ]);
+    geo = new THREE.BufferGeometry();
+    geo.setAttribute('position',new THREE.BufferAttribute(verts,3));
+    geo.computeVertexNormals();
+  }
+
+  const mat = new THREE.MeshPhongMaterial({
+    color: wireMode ? 0x08090e : faceColor,
+    emissive: new THREE.Color(faceColor).multiplyScalar(0.08),
+    specular: 0x336699,
+    shininess: 60,
+    transparent: true,
+    opacity: wireMode ? 0 : 0.85,
+    side: THREE.DoubleSide,
+  });
+
+  currentMesh = new THREE.Mesh(geo, mat);
+  currentMesh.castShadow = true;
+  scene.add(currentMesh);
+
+  // Wireframe
+  const wgeo = new THREE.WireframeGeometry(geo);
+  const wmat = new THREE.LineBasicMaterial({color: wireMode ? faceColor : darkColor, transparent:true, opacity: wireMode?1:0.6});
+  wireMesh = new THREE.LineSegments(wgeo,wmat);
+  scene.add(wireMesh);
+
+  rotX=0.3; rotY=0.5;
+  currentMesh.rotation.x=rotX;
+  currentMesh.rotation.y=rotY;
+  wireMesh.rotation.x=rotX;
+  wireMesh.rotation.y=rotY;
+}
+
+/* ── Resize ── */
+function resize(){
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight||460;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize',resize);
+resize();
+
+/* ── Animate ── */
+let lastT=0;
+function animate(t){
+  requestAnimationFrame(animate);
+  const dt=(t-lastT)/1000; lastT=t;
+  if(autoRotate && !isDragging && currentMesh){
+    rotY += dt*0.4;
+    currentMesh.rotation.y=rotY;
+    wireMesh.rotation.y=rotY;
+  }
+  renderer.render(scene,camera);
+}
+animate(0);
+
+/* ── Mouse / Touch drag ── */
+canvas.addEventListener('mousedown',e=>{isDragging=true;prevMouse={x:e.clientX,y:e.clientY}});
+window.addEventListener('mouseup',()=>isDragging=false);
+window.addEventListener('mousemove',e=>{
+  if(!isDragging||!currentMesh) return;
+  const dx=e.clientX-prevMouse.x, dy=e.clientY-prevMouse.y;
+  rotY+=dx*0.012; rotX+=dy*0.012;
+  rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
+  currentMesh.rotation.x=rotX; currentMesh.rotation.y=rotY;
+  wireMesh.rotation.x=rotX; wireMesh.rotation.y=rotY;
+  prevMouse={x:e.clientX,y:e.clientY};
+});
+
+// Touch
+canvas.addEventListener('touchstart',e=>{isDragging=true;prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
+canvas.addEventListener('touchend',()=>isDragging=false);
+canvas.addEventListener('touchmove',e=>{
+  if(!isDragging||!currentMesh) return;
+  const dx=e.touches[0].clientX-prevMouse.x, dy=e.touches[0].clientY-prevMouse.y;
+  rotY+=dx*0.012; rotX+=dy*0.012;
+  rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
+  currentMesh.rotation.x=rotX; currentMesh.rotation.y=rotY;
+  wireMesh.rotation.x=rotX; wireMesh.rotation.y=rotY;
+  prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+
+// Scroll zoom
+canvas.addEventListener('wheel',e=>{
+  camera.position.multiplyScalar(1+e.deltaY*0.001);
+},{passive:true});
+
+/* ══════════════════════════════════════════════
+   UI CONTROLS
+══════════════════════════════════════════════ */
+let activeShape = 'kubus';
+let activeInfoTab = 'tentang';
+
+function selectShape(key, btn){
+  activeShape = key;
+  document.querySelectorAll('.shape-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('canvasTitle').textContent = SHAPES[key].label;
+  buildShape(key);
+  renderInfo(key, activeInfoTab);
+}
+
+function switchInfoTab(tab, btn){
+  activeInfoTab = tab;
+  document.querySelectorAll('.info-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInfo(activeShape, tab);
+}
+
+function setColor(hex, hexDark, chip){
+  faceColor = parseInt(hex.replace('#',''),16);
+  darkColor = parseInt(hexDark.replace('#',''),16);
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));
+  chip.classList.add('sel');
+  buildShape(activeShape);
+}
+
+function toggleWire(){
+  wireMode = !wireMode;
+  document.getElementById('wireBtn').classList.toggle('on', wireMode);
+  buildShape(activeShape);
+}
+function toggleAuto(){
+  autoRotate = !autoRotate;
+  document.getElementById('autoBtn').classList.toggle('on', autoRotate);
+}
+
+/* ══════════════════════════════════════════════
+   RENDER INFO
+══════════════════════════════════════════════ */
+const COLORS = {kubus:'#4a90d9',balok:'#8b5cf6',prisma:'#2dd4bf',limas:'#f59e0b'};
+
+function renderInfo(key, tab){
+  const s = SHAPES[key];
+  const c = COLORS[key];
+
+  // Hide all panes
+  ['tentang','rumus','kalkulator'].forEach(t=>
+    document.getElementById('pane-'+t).style.display='none'
+  );
+  const pane = document.getElementById('pane-'+tab);
+  pane.style.display='block';
+
+  if(tab==='tentang'){
+    pane.innerHTML = `
+    <div class="about-panel">
+      <div class="about-title" style="color:${c}">${s.label}</div>
+      <div class="about-desc">${s.desc}</div>
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-val" style="color:${c}">${s.sifat.sisi}</div>
+          <div class="stat-lbl">Sisi</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:${c}">${s.sifat.rusuk}</div>
+          <div class="stat-lbl">Rusuk</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" style="color:${c}">${s.sifat.titikSudut}</div>
+          <div class="stat-lbl">Titik Sudut</div>
+        </div>
+      </div>
+      <div class="sifat-title">Sifat-Sifat</div>
+      <div class="sifat-list">
+        ${s.props.map(p=>`
+        <div class="sifat-item">
+          <div class="sifat-dot" style="background:${c}"></div>
+          <div>${p}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  } else if(tab==='rumus'){
+    pane.innerHTML = `
+    <div class="rumus-panel">
+      ${s.formulas.map(f=>`
+      <div class="formula-card">
+        <div class="formula-name">${f.name}</div>
+        <div class="formula-eq">${f.eq
+          .replace(/<var>/g,`<span class="var">`)
+          .replace(/<\/var>/g,'</span>')
+          .replace(/<op>/g,`<span class="op">`)
+          .replace(/<\/op>/g,'</span>')
+        }</div>
+        <div class="formula-note">ℹ ${f.note}</div>
+      </div>`).join('')}
+      <div class="jaring-hint">
+        <p>💡 <strong>Tips:</strong> Untuk memvisualisasikan ${s.label}, bayangkan jaring-jaringnya — potong dan bentangkan semua sisi menjadi bidang datar.</p>
+      </div>
+    </div>`;
+  } else {
+    pane.innerHTML = `
+    <div class="calc-panel">
+      <div class="calc-section-title">Masukkan Ukuran ${s.label}</div>
+      ${s.inputs.map(inp=>`
+      <div class="input-row">
+        <label><span>${inp.label}</span><em>${inp.unit}</em></label>
+        <input type="number" id="ci-${inp.id}" placeholder="${inp.ph}" min="0.001" step="any">
+      </div>`).join('')}
+      <button class="calc-btn" onclick="calculate()" style="background:linear-gradient(135deg,${c},${c}aa)">Hitung Sekarang →</button>
+      <div class="result-area" id="resultArea">
+        <div class="result-title">📊 Hasil Perhitungan</div>
+        <div id="resultRows"></div>
+      </div>
+    </div>`;
+  }
+}
+
+function calculate(){
+  const s = SHAPES[activeShape];
+  const vals = {};
+  s.inputs.forEach(inp => vals[inp.id] = document.getElementById('ci-'+inp.id)?.value||'');
+  const res = s.calc(vals);
+  const area = document.getElementById('resultArea');
+  const rows = document.getElementById('resultRows');
+  area.className = 'result-area show';
+  if(!res){
+    rows.innerHTML = '<div class="err-msg">⚠ Masukkan semua nilai dengan bilangan positif.</div>';
+    return;
+  }
+  rows.innerHTML = res.map(r=>`
+    <div class="result-item">
+      <span class="r-lbl">${r.l}</span>
+      <span class="r-val">${r.v}</span>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+buildShape('kubus');
+renderInfo('kubus','tentang');
+</script>
+</body>
+</html>
